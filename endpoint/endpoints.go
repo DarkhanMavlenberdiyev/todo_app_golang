@@ -2,19 +2,23 @@ package endpoint
 
 import (
 	"encoding/json"
+	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/gorilla/mux"
+	"github.com/streadway/amqp"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 )
 
-
+//endpoint for tasks
 func NewEndpointsFactory(tasktodo TaskTodo) *endpointsFactory {
 	return &endpointsFactory{taskTodo: tasktodo}
 }
+
+//endpoint for users
 func NewEndpointsFactoryUser(userInt UserInt) *endpointsFactory{
 	return &endpointsFactory{UserInt: userInt}
 }
@@ -56,6 +60,8 @@ func (ef *endpointsFactory) CreateUser() func (w http.ResponseWriter,r *http.Req
 		writeResponse(w,http.StatusCreated,response)
 	}
 }
+
+// Check email and passwords valid
 func ValidateEmail(user *User) error{
 	return validation.ValidateStruct(user,validation.Field(&user.Email,validation.Required,is.Email),
 		validation.Field(&user.Password,validation.Required,validation.Length(8,100)))
@@ -86,6 +92,7 @@ func (ef *endpointsFactory) SessionUser() func(w http.ResponseWriter,r *http.Req
 	}
 }
 
+//compare two passwords
 func CompareTwoPasswords(p1 string,p2 string) bool{
 	return bcrypt.CompareHashAndPassword([]byte(p1),[]byte(p2))==nil
 }
@@ -242,7 +249,58 @@ func (ef *endpointsFactory) ExecuteTask(idParam string) func(w http.ResponseWrit
 			writeResponse(w,http.StatusInternalServerError,[]byte("Error: "+err.Error()))
 			return
 		}
+
+
+		//declare Rabbit for producer
+		conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+		failOnError(err, "Failed to connect to RabbitMQ")
+		defer conn.Close()
+
+		ch, err := conn.Channel()
+		failOnError(err, "Failed to open a channel")
+		defer ch.Close()
+
+		q, err := ch.QueueDeclare(
+			"email", // name
+			true,    // durable
+			false,   // delete when unused
+			false,   // exclusive
+			false,   // no-wait
+			nil,     // arguments
+		)
+		failOnError(err, "Failed to declare a queue")
+
+		msg := amqp.Publishing{
+			Body: []byte(res.Title),
+		}
+
+		err = ch.Publish(
+			"",     // exchange
+			q.Name, // routing key
+			false,  // mandatory
+			false,  // immediate
+			msg)
+		failOnError(err, "Failed to publish a message")
+
+
 		writeResponse(w,http.StatusCreated,response)
+	}
+}
+
+func (ef *endpointsFactory) GetListUsers() func(w http.ResponseWriter,r *http.Request){
+	return func(w http.ResponseWriter, r *http.Request) {
+		listUsers,err := ef.taskTodo.GetListTask()
+		if err!=nil{
+			writeResponse(w,http.StatusInternalServerError,[]byte("Error: "+err.Error()))
+			return
+		}
+		data, err := json.Marshal(listUsers)
+		if err != nil {
+			writeResponse(w,http.StatusInternalServerError,[]byte("Error: "+err.Error()))
+			return
+		}
+		writeResponse(w,http.StatusOK,data)
+
 	}
 }
 
@@ -250,4 +308,11 @@ func (ef *endpointsFactory) ExecuteTask(idParam string) func(w http.ResponseWrit
 func writeResponse(w http.ResponseWriter,status int,msg []byte) {
 	w.WriteHeader(status)
 	w.Write(msg)
+}
+
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		fmt.Errorf("%s: %s", msg, err)
+	}
 }

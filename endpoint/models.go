@@ -17,6 +17,7 @@ type Task struct {
 }
 
 
+//Interfaces for task
 type TaskTodo interface {
 	CreateTask(task *Task) (*Task,error)
 	GetTask(id int) (*Task,error)
@@ -25,7 +26,9 @@ type TaskTodo interface {
 	GetListTask() ([]*Task,error)
 }
 
+//Interfaces for user
 type UserInt interface {
 	CreateUser(user *User) (*User,error)
 	GetUser(email string) (*User,error)
+	GetListUsers()([]*User,error)
 }
