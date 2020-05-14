@@ -23,11 +23,13 @@ func NewEndpointsFactoryUser(userInt UserInt) *endpointsFactory{
 	return &endpointsFactory{UserInt: userInt}
 }
 
+//endpointsFactory ...
 type endpointsFactory struct {
 	taskTodo TaskTodo
 	UserInt	 UserInt
 }
 
+//CreateUser ...
 func (ef *endpointsFactory) CreateUser() func (w http.ResponseWriter,r *http.Request){
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
@@ -48,6 +50,8 @@ func (ef *endpointsFactory) CreateUser() func (w http.ResponseWriter,r *http.Req
 		}
 
 		result, err := ef.UserInt.CreateUser(user)
+		//santirize password
+		result.Password = ""
 		if err != nil {
 			writeResponse(w,http.StatusInternalServerError,[]byte("Error: "+err.Error()))
 			return
@@ -67,7 +71,7 @@ func ValidateEmail(user *User) error{
 		validation.Field(&user.Password,validation.Required,validation.Length(8,100)))
 }
 
-
+//SessionUser ...
 func (ef *endpointsFactory) SessionUser() func(w http.ResponseWriter,r *http.Request){
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
@@ -98,6 +102,7 @@ func CompareTwoPasswords(p1 string,p2 string) bool{
 }
 
 
+//GetTask ...
 func (ef *endpointsFactory) GetTask(idParam string) func(w http.ResponseWriter,r *http.Request){
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -121,6 +126,7 @@ func (ef *endpointsFactory) GetTask(idParam string) func(w http.ResponseWriter,r
 	}
 }
 
+//CreateTask ...
 func (ef *endpointsFactory) CreateTask() func(w http.ResponseWriter,r *http.Request){
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
@@ -146,6 +152,8 @@ func (ef *endpointsFactory) CreateTask() func(w http.ResponseWriter,r *http.Requ
 		writeResponse(w,http.StatusCreated,response)
 	}
 }
+
+//UpdateTask ...
 func (ef *endpointsFactory) UpdateTask(idParam string) func(w http.ResponseWriter,r *http.Request){
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -179,6 +187,8 @@ func (ef *endpointsFactory) UpdateTask(idParam string) func(w http.ResponseWrite
 
 	}
 }
+
+//DeleteTask ...
 func (ef *endpointsFactory) DeleteTask(idParam string) func(w http.ResponseWriter,r *http.Request){
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -198,6 +208,7 @@ func (ef *endpointsFactory) DeleteTask(idParam string) func(w http.ResponseWrite
 
 	}
 }
+//GetListTask ...
 func (ef *endpointsFactory) GetListTask() func(w http.ResponseWriter,r *http.Request){
 	return func(w http.ResponseWriter, r *http.Request) {
 		list,err := ef.taskTodo.GetListTask()
@@ -216,6 +227,8 @@ func (ef *endpointsFactory) GetListTask() func(w http.ResponseWriter,r *http.Req
 
 	}
 }
+
+// ExecuteTask ...
 func (ef *endpointsFactory) ExecuteTask(idParam string) func(w http.ResponseWriter,r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -287,6 +300,7 @@ func (ef *endpointsFactory) ExecuteTask(idParam string) func(w http.ResponseWrit
 	}
 }
 
+// GetListUsers ...
 func (ef *endpointsFactory) GetListUsers() func(w http.ResponseWriter,r *http.Request){
 	return func(w http.ResponseWriter, r *http.Request) {
 		listUsers,err := ef.taskTodo.GetListTask()
@@ -305,12 +319,13 @@ func (ef *endpointsFactory) GetListUsers() func(w http.ResponseWriter,r *http.Re
 }
 
 
+
 func writeResponse(w http.ResponseWriter,status int,msg []byte) {
 	w.WriteHeader(status)
 	w.Write(msg)
 }
 
-
+//if dont connect to rabbitMQ
 func failOnError(err error, msg string) {
 	if err != nil {
 		fmt.Errorf("%s: %s", msg, err)
