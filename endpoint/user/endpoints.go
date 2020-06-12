@@ -5,6 +5,7 @@ import (
 	"github.com/satori/go.uuid"
 	"github.com/valyala/fasthttp"
 	"github.com/gospodinzerkalo/todo_app_golang/redis"
+	"fmt"
 	"time"
 )
 
@@ -50,7 +51,8 @@ func (ef *endpointsFactory) SignIn() func (ctx *fasthttp.RequestCtx){
 		cookie.SetKey("session_token")
 		cookie.SetValue(sessionToken.String())
 		cookie.SetExpire(time.Now().Add(120*time.Second))
-		ctx.Response.Header.Cookie(cookie)
+		ctx.Response.Header.SetCookie(cookie)
+
 
 	}
 }
@@ -91,6 +93,30 @@ func (ef *endpointsFactory) GetListUsers() func(ctx *fasthttp.RequestCtx){
 			return
 		}
 		writeResponse(ctx,fasthttp.StatusOK,data)
+
+	}
+}
+
+func (ef *endpointsFactory) Welcome() func (ctx *fasthttp.RequestCtx){
+	return func(ctx *fasthttp.RequestCtx) {
+		c  := string(ctx.Request.Header.Cookie("session_token"))
+		fmt.Println(c)
+		if c == ""{
+			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte("Error: Please signin again"))
+			return
+		}
+		session_token := c
+		response,err := redis.Cache.Do("GET",session_token)
+		if err != nil {
+			writeResponse(ctx,fasthttp.StatusInternalServerError,[]byte(err.Error()))
+			return
+		}
+		if response==nil {
+			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte(""))
+			return
+		}
+
+		writeResponse(ctx,fasthttp.StatusOK,[]byte(fmt.Sprintf("Welcome %v",response)))
 
 	}
 }

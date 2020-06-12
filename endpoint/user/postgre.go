@@ -43,7 +43,7 @@ func(p postgreStore) GetUser(email string) (*User,error){
 	user := &User{}
 	err := p.db.Model(user).Where(fmt.Sprintf("email = '%v'",email)).Select()
 	//s,e := p.db.Query(&user,"SELECT * from users WHERE email='"+email+"'")
-	fmt.Println(err,user)
+
 
 	if err != nil{
 		return nil,err
