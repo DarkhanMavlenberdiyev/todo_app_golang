@@ -162,9 +162,6 @@ func (ef *endpointsFactory) ExecuteTask() func(ctx *fasthttp.RequestCtx) {
 }
 
 
-
-
-
 func writeResponse(ctx *fasthttp.RequestCtx,status int,msg []byte) {
 	ctx.SetStatusCode(status)
 	ctx.Write(msg)

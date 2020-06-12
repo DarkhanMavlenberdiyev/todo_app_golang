@@ -2,12 +2,22 @@ package main
 
 import (
 	"github.com/buaazp/fasthttprouter"
+	"github.com/gospodinzerkalo/todo_app_golang/endpoint"
+	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
+	"github.com/valyala/fasthttp"
 	"log"
 	"os"
-	"github.com/valyala/fasthttp"
-	"github.com/gospodinzerkalo/todo_app_golang/endpoint"
 )
+
+
+// init is invoked before main()
+func init() {
+	// loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
 
 func main() {
 	// CLI command for starting APP
@@ -24,18 +34,47 @@ func main() {
 }
 
 func StartServer(c *cli.Context) error {
+	dbUser,exist := os.LookupEnv("DB_USER")
+	if !exist || dbUser ==""{
+		log.Println("db_user not found in .env file")
+		return nil
+	}
+	dbPassword,exist := os.LookupEnv("DB_PASSWORD")
+	if !exist || dbPassword =="" {
+		log.Println("db_password not found in .env file")
+		return nil
+	}
+	dbPort,exist := os.LookupEnv("DB_PORT")
+	if !exist || dbPort ==""{
+		log.Println("db_port not found in .env file")
+		return nil
+	}
+	dbHost,exist := os.LookupEnv("DB_HOST")
+	if !exist || dbHost ==""{
+		log.Println("db_host not found in .env file")
+		return nil
+	}
+	dbDatabaseName,exist := os.LookupEnv("DATABASE_NAME")
+	if !exist{
+		log.Println("database_name not found in .env file")
+	}
 
 
-	//User for coonection to db
+	//User for connection to db
 	user := endpoint.PostgreConfig{
-		User:     "postgres",
-		Password: "daha2000",
-		Port:     "5432",
-		Host:     "127.0.0.1",
+		User:     dbUser,
+		Password: dbPassword,
+		Port:     dbPort,
+		Host:     dbHost,
+		Database: dbDatabaseName,
 	}
 	//Connect db
-	db := endpoint.NewPostgre(user)
+	db,err := endpoint.NewPostgre(user)
 
+	if err!= nil {
+		log.Println(err)
+		return nil
+	}
 
 	endpoints := endpoint.NewEndpointsFactory(db)
 
@@ -43,8 +82,6 @@ func StartServer(c *cli.Context) error {
 
 	// router
 	router := fasthttprouter.New()
-
-
 
 
 	//endpoints for tasks todo
