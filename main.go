@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/buaazp/fasthttprouter"
 	"github.com/gospodinzerkalo/todo_app_golang/endpoint/task"
+	"github.com/gospodinzerkalo/todo_app_golang/endpoint/user"
+	"github.com/gospodinzerkalo/todo_app_golang/redis"
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
 	"github.com/valyala/fasthttp"
@@ -20,6 +22,7 @@ func init() {
 }
 
 func main() {
+	redis.InitCache()
 	// CLI command for starting APP
 	app := cli.NewApp()
 	app.Commands = cli.Commands{
@@ -61,22 +64,37 @@ func StartServer(c *cli.Context) error {
 
 
 	//User for connection to db
-	user := task.PostgreConfig{
+	userConfig := task.PostgreConfig{
 		User:     dbUser,
 		Password: dbPassword,
 		Port:     dbPort,
 		Host:     dbHost,
 		Database: dbDatabaseName,
 	}
-	//Connect db
-	db,err := task.NewPostgre(user)
+	userConfig2 := user.PostgreConfig{
+		User:     dbUser,
+		Password: dbPassword,
+		Port:     dbPort,
+		Host:     dbHost,
+		Database: dbDatabaseName,
+	}
 
-	if err!= nil {
+	//Connect db
+	db,err := task.NewPostgre(userConfig)
+
+	if err != nil {
 		log.Println(err)
 		return nil
 	}
+	pgUser,err := user.NewPostgre(userConfig2)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 
 	endpoints := task.NewEndpointsFactory(db)
+	endpointsUser := user.NewEndpointsFactory(pgUser)
 
 
 
@@ -93,7 +111,8 @@ func StartServer(c *cli.Context) error {
 	router.DELETE("/api/todo/:id",endpoints.DeleteTask())
 
 	// endpoints for user auth
-
+	router.POST("/signup",endpointsUser.CreateUser())
+	router.POST("/signin",endpointsUser.GetUser())
 
 
 	// Start the server

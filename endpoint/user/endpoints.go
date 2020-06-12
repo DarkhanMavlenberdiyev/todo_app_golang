@@ -7,8 +7,8 @@ import (
 )
 
 // init endpointFactory for user
-func NewEndpointsFactory(userInfo UserInfo) *endpointsFactory {
-	return &endpointsFactory{userInfo: userInfo}
+func NewEndpointsFactory(userinfo UserInfo) *endpointsFactory {
+	return &endpointsFactory{userInfo: userinfo}
 }
 
 

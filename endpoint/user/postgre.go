@@ -14,7 +14,7 @@ type PostgreConfig struct {
 }
 
 //Connection to postgre (for task)
-func NewPostgre(config PostgreConfig) (UserInfo,error) {
+func NewPostgre(config PostgreConfig) (UserInfo, error) {
 	db := pg.Connect(&pg.Options{
 		Addr:     config.Host + ":" + config.Port,
 		User:     config.User,
@@ -26,9 +26,9 @@ func NewPostgre(config PostgreConfig) (UserInfo,error) {
 		IfNotExists:   true,
 	})
 	if err!= nil {
-		return nil,err
+		return nil, err
 	}
-	return &postgreStore{db: db},nil
+	return &postgreStore{db: db}, nil
 }
 
 //db func.

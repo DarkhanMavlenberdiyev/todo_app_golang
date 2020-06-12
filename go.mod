@@ -9,7 +9,7 @@ require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/go-pg/pg/v10 v10.0.0-beta.2 // indirect
-	github.com/gomodule/redigo v2.0.0+incompatible // indirect
+	github.com/gomodule/redigo v2.0.0+incompatible
 
 	github.com/gorilla/mux v1.7.4
 	github.com/joho/godotenv v1.3.0 // indirect
