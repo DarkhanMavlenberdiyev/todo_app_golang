@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 )
 //Config struct
 type PostgreConfig struct {
@@ -19,52 +20,19 @@ func NewPostgre(config PostgreConfig) (TaskTodo) {
 		Password: config.Password,
 		Database:"todo",
 	})
-
-	return &postgreStore{db: db}
-}
-
-//Connection to postgre (for user)
-func NewPostgreUser(config PostgreConfig) (UserInt) {
-	db := pg.Connect(&pg.Options{
-		Addr:     config.Host + ":" + config.Port,
-		User:     config.User,
-		Password: config.Password,
-		Database:"todo",
+	db.CreateTable((Task)(nil),&orm.CreateTableOptions{
+		IfNotExists:   true,
 	})
-
 	return &postgreStore{db: db}
 }
+
+
 
 //db func.
 type postgreStore struct {
 	db *pg.DB
 }
 
-func (p postgreStore) GetListUsers() ([]*User, error) {
-	var users []*User
-	err := p.db.Model(&users).Select()
-
-	if err != nil {
-		return nil, err
-	}
-	return users, err
-}
-
-//CreateUser ...
-func (p postgreStore) CreateUser(user *User) (*User, error) {
-	res := p.db.Insert(user)
-	return user, res
-}
-
-//GetUser ...
-func (p postgreStore) GetUser(email string) (*User, error) {
-	user := &User{Email: email}
-	err := p.db.Select(user)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
 
 //DeleteTask ...
 func (p postgreStore) DeleteTask(id int) error {
