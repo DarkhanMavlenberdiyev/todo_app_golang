@@ -1,4 +1,4 @@
-package endpoint
+package task
 
 import "time"
 
@@ -34,7 +34,7 @@ type TaskTodo interface {
 // interfaces for user
 type UserInfo interface {
 	CreateUser(user *User) (*User,error)
-	GetTask(id int) (*User,error)
+	GetUser(id int) (*User,error)
 	UpdateUser(id int, user *User) (*User,error)
 	DeleteUser(id int) error
 }

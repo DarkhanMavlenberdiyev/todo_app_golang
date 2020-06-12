@@ -1,4 +1,4 @@
-package endpoint
+package task
 
 import (
 	"testing"
@@ -7,14 +7,14 @@ import (
 
 func TestEndpointsFactory_GetTask(t *testing.T) {
 	var err error
-	user := PostgreConfig{
+	user := task2.PostgreConfig{
 		User:     "postgres",
 		Password: "daha2000",
 		Port:     "5432",
 		Host:     "127.0.0.1",
 	}
-	db := NewPostgre(user)
-	endpoints := NewEndpointsFactory(db)
+	db := task2.NewPostgre(user)
+	endpoints := task2.NewEndpointsFactory(db)
 
 	task , err := endpoints.taskTodo.GetTask(1)
 	if err != nil {
@@ -27,15 +27,15 @@ func TestEndpointsFactory_GetTask(t *testing.T) {
 }
 
 func TestEndpointsFactory_CreateTask(t *testing.T) {
-	user := PostgreConfig{
+	user := task2.PostgreConfig{
 		User:     "postgres",
 		Password: "daha2000",
 		Port:     "5432",
 		Host:     "127.0.0.1",
 	}
-	db := NewPostgre(user)
-	endpoints := NewEndpointsFactory(db)
-	task := &Task{
+	db := task2.NewPostgre(user)
+	endpoints := task2.NewEndpointsFactory(db)
+	task := &task2.Task{
 		ID:          3,
 		Title:       "sdasd",
 		Description: "DSde",

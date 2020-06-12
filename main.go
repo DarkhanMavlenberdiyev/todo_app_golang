@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/buaazp/fasthttprouter"
-	"github.com/gospodinzerkalo/todo_app_golang/endpoint"
+	"github.com/gospodinzerkalo/todo_app_golang/endpoint/task"
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
 	"github.com/valyala/fasthttp"
@@ -61,7 +61,7 @@ func StartServer(c *cli.Context) error {
 
 
 	//User for connection to db
-	user := endpoint.PostgreConfig{
+	user := task.PostgreConfig{
 		User:     dbUser,
 		Password: dbPassword,
 		Port:     dbPort,
@@ -69,14 +69,14 @@ func StartServer(c *cli.Context) error {
 		Database: dbDatabaseName,
 	}
 	//Connect db
-	db,err := endpoint.NewPostgre(user)
+	db,err := task.NewPostgre(user)
 
 	if err!= nil {
 		log.Println(err)
 		return nil
 	}
 
-	endpoints := endpoint.NewEndpointsFactory(db)
+	endpoints := task.NewEndpointsFactory(db)
 
 
 

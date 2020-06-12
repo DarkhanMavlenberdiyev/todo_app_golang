@@ -1,9 +1,8 @@
-package endpoint
+package task
 
 import (
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
-
 )
 //Config struct
 type PostgreConfig struct {
