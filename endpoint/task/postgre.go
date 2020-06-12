@@ -27,12 +27,6 @@ func NewPostgre(config PostgreConfig) (TaskTodo,error) {
 	if err!= nil {
 		return nil,err
 	}
-	err = db.CreateTable(&User{},&orm.CreateTableOptions{
-		IfNotExists:   true,
-	})
-	if err!= nil {
-		return nil,err
-	}
 	return &postgreStore{db: db},nil
 }
 
