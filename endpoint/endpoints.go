@@ -17,8 +17,6 @@ type endpointsFactory struct {
 }
 
 
-
-
 //GetTask ...
 func (ef *endpointsFactory) GetTask() func(ctx *fasthttp.RequestCtx){
 	return func(ctx *fasthttp.RequestCtx) {

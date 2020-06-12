@@ -17,7 +17,11 @@
 <a href="github.com/joho/godotenv">godotenv</a><br><hr>
 <h2>Installation (linux)</h2>
 <h3>Clone the project</h3>
-<code>git clone https://github.com/gospodinzerkalo/todo_app_golang</code>
+<code>$ git clone https://github.com/gospodinzerkalo/todo_app_golang</code>
+<h3>Create database</h3>
+<code>$ psql -c "CREATE DATABASE todo_app" </code> <br> or <br>
+<code>$ make createDB</code>
+
 <h3>Build and run</h3>
-<code>make build</code><br>
-<code>make run</code>
+<code>$ make build</code><br>
+<code>$ make run</code>

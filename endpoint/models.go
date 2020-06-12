@@ -12,6 +12,15 @@ type Task struct {
 	IsDone		bool		`json:"is_done"`
 }
 
+// model for user
+type User struct {
+	ID 				int 		`json:"id"`
+	FirstName 		string 		`json:"first_name"`
+	LastName		string 		`json:"last_name"`
+	Email			string 		`json:"email"`
+	Password		string 		`json:"password"`
+}
+
 
 //Interfaces for task
 type TaskTodo interface {
@@ -22,3 +31,10 @@ type TaskTodo interface {
 	GetListTask() ([]*Task,error)
 }
 
+// interfaces for user
+type UserInfo interface {
+	CreateUser(user *User) (*User,error)
+	GetTask(id int) (*User,error)
+	UpdateUser(id int, user *User) (*User,error)
+	DeleteUser(id int) error
+}

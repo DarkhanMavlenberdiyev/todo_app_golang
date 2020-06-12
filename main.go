@@ -92,6 +92,9 @@ func StartServer(c *cli.Context) error {
 	router.POST("/api/todo",endpoints.CreateTask())
 	router.DELETE("/api/todo/:id",endpoints.DeleteTask())
 
+	// endpoints for user auth
+
+
 
 	// Start the server
 	log.Fatal(fasthttp.ListenAndServe(":8000",router.Handler))
