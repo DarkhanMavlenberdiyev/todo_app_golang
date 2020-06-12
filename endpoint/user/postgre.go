@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
+	"fmt"
 )
 //Config struct
 type PostgreConfig struct {
@@ -28,6 +29,7 @@ func NewPostgre(config PostgreConfig) (UserInfo, error) {
 	if err!= nil {
 		return nil, err
 	}
+
 	return &postgreStore{db: db}, nil
 }
 
@@ -37,9 +39,12 @@ type postgreStore struct {
 }
 
 //GetUser...
-func(p postgreStore) GetUser(id int) (*User,error){
-	user := &User{ID: id}
-	err := p.db.Select(user)
+func(p postgreStore) GetUser(email string) (*User,error){
+	user := &User{}
+	err := p.db.Model(user).Where(fmt.Sprintf("email = '%v'",email)).Select()
+	//s,e := p.db.Query(&user,"SELECT * from users WHERE email='"+email+"'")
+	fmt.Println(err,user)
+
 	if err != nil{
 		return nil,err
 	}
@@ -58,6 +63,7 @@ func(p postgreStore) UpdateUser(id int,user *User) (*User,error){
 	return user,err
 }
 
+// DeleteUser...
 func(p postgreStore) DeleteUser(id int) error {
 	user := User{ID: id}
 	err := p.db.Delete(user)
@@ -65,4 +71,14 @@ func(p postgreStore) DeleteUser(id int) error {
 		return err
 	}
 	return nil
+}
+
+func(p postgreStore) ListUsers() ([]*User,error){
+	var users []*User
+	err := p.db.Model(&users).Select()
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+
 }

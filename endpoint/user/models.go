@@ -12,7 +12,10 @@ type User struct {
 // interfaces for user
 type UserInfo interface {
 	CreateUser(user *User) (*User,error)
-	GetUser(id int) (*User,error)
+	GetUser(email string) (*User,error)
 	UpdateUser(id int, user *User) (*User,error)
 	DeleteUser(id int) error
+	ListUsers() ([]*User,error)
 }
+
+

@@ -112,7 +112,8 @@ func StartServer(c *cli.Context) error {
 
 	// endpoints for user auth
 	router.POST("/signup",endpointsUser.CreateUser())
-	router.POST("/signin",endpointsUser.GetUser())
+	router.POST("/signin",endpointsUser.SignIn())
+	router.GET("/list",endpointsUser.GetListUsers())
 
 
 	// Start the server

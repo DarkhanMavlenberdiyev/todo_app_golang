@@ -13,8 +13,10 @@ require (
 
 	github.com/gorilla/mux v1.7.4
 	github.com/joho/godotenv v1.3.0 // indirect
+	github.com/satori/go.uuid v1.2.0
 	github.com/streadway/amqp v1.0.0
 	github.com/urfave/cli/v2 v2.2.0 // indirect
 	github.com/valyala/fasthttp v1.14.0
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
+	golang.org/x/tools v0.0.0-20190524140312-2c0ae7006135
 )

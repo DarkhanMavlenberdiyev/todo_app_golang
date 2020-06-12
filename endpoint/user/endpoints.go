@@ -2,8 +2,10 @@ package user
 
 import (
 	"encoding/json"
+	"github.com/satori/go.uuid"
 	"github.com/valyala/fasthttp"
-	"strconv"
+	"github.com/gospodinzerkalo/todo_app_golang/redis"
+	"time"
 )
 
 // init endpointFactory for user
@@ -18,25 +20,38 @@ type endpointsFactory struct {
 
 
 //GetUser
-func (ef *endpointsFactory) GetUser() func (ctx *fasthttp.RequestCtx){
+func (ef *endpointsFactory) SignIn() func (ctx *fasthttp.RequestCtx){
 	return func(ctx *fasthttp.RequestCtx) {
-		vars := ctx.FormValue("id")
-		id, err := strconv.Atoi(string(vars))
+		user := &User{}
+		body := ctx.PostBody()
+		if err := json.Unmarshal(body,user);err != nil {
+			writeResponse(ctx,fasthttp.StatusBadRequest,[]byte("Error: invalid input"))
+			return
+		}
+		res,err := ef.userInfo.GetUser(user.Email)
 		if err != nil {
-			writeResponse(ctx,fasthttp.StatusBadRequest,[]byte("Error: "+err.Error()))
+			writeResponse(ctx,fasthttp.StatusNotFound,[]byte("Not found s"))
 			return
 		}
-		res,err := ef.userInfo.GetUser(id)
+		// check password
+		if res.Password != user.Password {
+			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte("incorrect email or password"))
+			return
+		}
+		//create session token for user
+		sessionToken := uuid.NewV4()
+
+		_,err = redis.Cache.Do("SETEX",sessionToken.String(),"120",user.Email)
 		if err != nil {
-			writeResponse(ctx,fasthttp.StatusNotFound,[]byte("Not found"))
+			writeResponse(ctx,fasthttp.StatusInternalServerError,[]byte("Error!"))
 			return
 		}
-		data,err := json.Marshal(res)
-		if err != nil{
-			writeResponse(ctx,fasthttp.StatusInternalServerError,[]byte("Error! Try again"))
-			return
-		}
-		writeResponse(ctx,fasthttp.StatusOK,data)
+		cookie := &fasthttp.Cookie{}
+		cookie.SetKey("session_token")
+		cookie.SetValue(sessionToken.String())
+		cookie.SetExpire(time.Now().Add(120*time.Second))
+		ctx.Response.Header.Cookie(cookie)
+
 	}
 }
 //CreateUser...
@@ -59,6 +74,24 @@ func (ef *endpointsFactory) CreateUser() func (ctx *fasthttp.RequestCtx){
 			return
 		}
 		writeResponse(ctx,fasthttp.StatusCreated,response)
+	}
+}
+
+//GetListTask ...
+func (ef *endpointsFactory) GetListUsers() func(ctx *fasthttp.RequestCtx){
+	return func(ctx *fasthttp.RequestCtx) {
+		list,err := ef.userInfo.ListUsers()
+		if err!=nil{
+			writeResponse(ctx,fasthttp.StatusInternalServerError,[]byte("Error: "+err.Error()))
+			return
+		}
+		data, err := json.Marshal(list)
+		if err != nil {
+			writeResponse(ctx,fasthttp.StatusInternalServerError,[]byte("Error: "+err.Error()))
+			return
+		}
+		writeResponse(ctx,fasthttp.StatusOK,data)
+
 	}
 }
 
