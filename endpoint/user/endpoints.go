@@ -42,7 +42,7 @@ func (ef *endpointsFactory) SignIn() func (ctx *fasthttp.RequestCtx){
 		//create session token for user
 		sessionToken := uuid.NewV4()
 
-		_,err = redis.Cache.Do("SETEX",sessionToken.String(),"120",user.Email)
+		_,err = redis.Cache.Do("SETEX",sessionToken.String(),"60",user.Email)
 		if err != nil {
 			writeResponse(ctx,fasthttp.StatusInternalServerError,[]byte("Error!"))
 			return
@@ -50,7 +50,7 @@ func (ef *endpointsFactory) SignIn() func (ctx *fasthttp.RequestCtx){
 		cookie := &fasthttp.Cookie{}
 		cookie.SetKey("session_token")
 		cookie.SetValue(sessionToken.String())
-		cookie.SetExpire(time.Now().Add(120*time.Second))
+		cookie.SetExpire(time.Now().Add(60*time.Second))
 		ctx.Response.Header.SetCookie(cookie)
 
 
@@ -100,7 +100,6 @@ func (ef *endpointsFactory) GetListUsers() func(ctx *fasthttp.RequestCtx){
 func (ef *endpointsFactory) Welcome() func (ctx *fasthttp.RequestCtx){
 	return func(ctx *fasthttp.RequestCtx) {
 		c  := string(ctx.Request.Header.Cookie("session_token"))
-		fmt.Println(c)
 		if c == ""{
 			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte("Error: Please signin again"))
 			return

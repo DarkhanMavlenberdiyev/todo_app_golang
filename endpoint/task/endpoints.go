@@ -20,6 +20,11 @@ type endpointsFactory struct {
 //GetTask ...
 func (ef *endpointsFactory) GetTask() func(ctx *fasthttp.RequestCtx){
 	return func(ctx *fasthttp.RequestCtx) {
+		c  := string(ctx.Request.Header.Cookie("session_token"))
+		if c == ""{
+			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte("Error: you don't sign in or session is over"))
+			return
+		}
 		vars := ctx.FormValue("id")
 
 		idd, _ := strconv.Atoi(string(vars))
@@ -41,6 +46,11 @@ func (ef *endpointsFactory) GetTask() func(ctx *fasthttp.RequestCtx){
 //CreateTask ...
 func (ef *endpointsFactory) CreateTask() func(ctx *fasthttp.RequestCtx){
 	return func(ctx *fasthttp.RequestCtx) {
+		c  := string(ctx.Request.Header.Cookie("session_token"))
+		if c == ""{
+			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte("Error: you don't sign in or session is over"))
+			return
+		}
 		data := ctx.PostBody()
 
 		task := &Task{}
@@ -65,6 +75,11 @@ func (ef *endpointsFactory) CreateTask() func(ctx *fasthttp.RequestCtx){
 //UpdateTask ...
 func (ef *endpointsFactory) UpdateTask() func(ctx *fasthttp.RequestCtx){
 	return func(ctx *fasthttp.RequestCtx) {
+		c  := string(ctx.Request.Header.Cookie("session_token"))
+		if c == ""{
+			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte("Error: you don't sign in or session is over"))
+			return
+		}
 		vars := ctx.FormValue("id")
 
 		data := ctx.PostBody()
@@ -93,6 +108,11 @@ func (ef *endpointsFactory) UpdateTask() func(ctx *fasthttp.RequestCtx){
 //DeleteTask ...
 func (ef *endpointsFactory) DeleteTask() func(ctx *fasthttp.RequestCtx){
 	return func(ctx *fasthttp.RequestCtx) {
+		c  := string(ctx.Request.Header.Cookie("session_token"))
+		if c == ""{
+			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte("Error: you don't sign in or session is over"))
+			return
+		}
 		vars := ctx.FormValue("id")
 		idd, _ := strconv.Atoi(string(vars))
 		err := ef.taskTodo.DeleteTask(idd)
@@ -108,6 +128,11 @@ func (ef *endpointsFactory) DeleteTask() func(ctx *fasthttp.RequestCtx){
 //GetListTask ...
 func (ef *endpointsFactory) GetListTask() func(ctx *fasthttp.RequestCtx){
 	return func(ctx *fasthttp.RequestCtx) {
+		c  := string(ctx.Request.Header.Cookie("session_token"))
+		if c == ""{
+			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte("Error: you don't sign in or session is over"))
+			return
+		}
 		list,err := ef.taskTodo.GetListTask()
 		if err!=nil{
 			writeResponse(ctx,fasthttp.StatusInternalServerError,[]byte("Error: "+err.Error()))
@@ -126,6 +151,11 @@ func (ef *endpointsFactory) GetListTask() func(ctx *fasthttp.RequestCtx){
 // ExecuteTask ...
 func (ef *endpointsFactory) ExecuteTask() func(ctx *fasthttp.RequestCtx) {
 	return func(ctx *fasthttp.RequestCtx) {
+		c  := string(ctx.Request.Header.Cookie("session_token"))
+		if c == ""{
+			writeResponse(ctx,fasthttp.StatusUnauthorized,[]byte("Error: you don't sign in or session is over"))
+			return
+		}
 		vars := ctx.FormValue("id")
 		idd, _ := strconv.Atoi(string(vars))
 		res, err := ef.taskTodo.GetTask(idd)

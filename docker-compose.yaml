@@ -1,0 +1,37 @@
+version: "3"
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: todo_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: daha2000
+
+  redis:
+    image: redis:alpine
+    ports:
+    - "6379"
+    environment:
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+    command: redis-server /etc/redis.conf
+    volumes:
+      - /redis/redis.conf:/etc/redis.conf
+
+
+  app:
+    image: todo:alpine
+    restart: always
+    build: .
+    command: "make run"
+    volumes:
+      - ./app:/go/src/app
+    ports:
+    - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    links:
+      - db
+      - redis
+

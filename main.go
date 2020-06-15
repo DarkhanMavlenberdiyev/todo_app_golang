@@ -10,6 +10,7 @@ import (
 	"github.com/valyala/fasthttp"
 	"log"
 	"os"
+	"fmt"
 )
 
 
@@ -22,7 +23,7 @@ func init() {
 }
 
 func main() {
-	redis.InitCache()
+	redis.InitCache(getRedisHost())
 	// CLI command for starting APP
 	app := cli.NewApp()
 	app.Commands = cli.Commands{
@@ -37,30 +38,27 @@ func main() {
 }
 
 func StartServer(c *cli.Context) error {
-	dbUser,exist := os.LookupEnv("DB_USER")
+	dbUser,exist := os.LookupEnv("POSTGRES_USER")
 	if !exist || dbUser ==""{
 		log.Println("db_user not found in .env file")
 		return nil
 	}
-	dbPassword,exist := os.LookupEnv("DB_PASSWORD")
+	dbPassword,exist := os.LookupEnv("POSTGRES_PASSWORD")
 	if !exist || dbPassword =="" {
 		log.Println("db_password not found in .env file")
 		return nil
 	}
-	dbPort,exist := os.LookupEnv("DB_PORT")
-	if !exist || dbPort ==""{
-		log.Println("db_port not found in .env file")
-		return nil
-	}
-	dbHost,exist := os.LookupEnv("DB_HOST")
-	if !exist || dbHost ==""{
-		log.Println("db_host not found in .env file")
-		return nil
-	}
-	dbDatabaseName,exist := os.LookupEnv("DATABASE_NAME")
+	dbPort:= os.Getenv("DB_PORT")
+
+	dbHost 	:= os.Getenv("DB_HOST")
+
+	dbDatabaseName,exist := os.LookupEnv("POSTGRES_DB")
 	if !exist{
 		log.Println("database_name not found in .env file")
+		return nil
 	}
+
+
 
 
 	//User for connection to db
@@ -118,9 +116,28 @@ func StartServer(c *cli.Context) error {
 
 
 	// Start the server
-	log.Fatal(fasthttp.ListenAndServe(":8000",router.Handler))
+	log.Fatal(fasthttp.ListenAndServe(getPort(),router.Handler))
 
 	return nil
 }
 
+func getPort() string{
+	var port = os.Getenv("PORT")
+	// Set a default port if there is nothing in the environment
+	if port == "" {
+		port = "8000"
+		fmt.Println("INFO: No PORT environment variable detected, defaulting to " + port)
+	}
+	return ":" + port
+}
 
+
+func getRedisHost() string {
+	var host = os.Getenv("REDIS_HOST")+":"+os.Getenv("REDIS_PORT")
+	// Set a default port if there is nothing in the environment
+	if host == "" {
+		host = "redis://localhost"
+		fmt.Println("INFO: No PORT environment variable detected, defaulting to " + host)
+	}
+	return host
+}

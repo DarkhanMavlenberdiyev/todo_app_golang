@@ -7,11 +7,11 @@ import (
 var Cache redis.Conn
 
 
-func InitCache() {
+func InitCache(host string) {
 	// init the redis connection
-	conn,err := redis.DialURL("redis://localhost")
+	conn,err := redis.Dial("tcp",host)
 	if err != nil {
-		panic(err)
+		panic(err.Error()+" asd")
 	}
 	// assign the connection to cache variable
 	Cache = conn
